@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { DomSanitizer } from '@angular/platform-browser';
+import { WebView } from '@ionic-native/ionic-webview/ngx';
 
 @Component({
   selector: 'app-tab2',
@@ -9,7 +11,8 @@ import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 export class Tab2Page {
   public base64Image: string;
 
-  constructor(private camera: Camera) {}
+  constructor(private camera: Camera, private domSanitizer: DomSanitizer,
+              protected webview: WebView) {}
 
   public takePicture() {
     const options: CameraOptions = {
@@ -22,9 +25,10 @@ export class Tab2Page {
     this.camera.getPicture(options).then((imageData) => {
       // imageData is either a base64 encoded string or a file URI
       // If it's base64 (DATA_URL):
-      this.base64Image = 'data:image/jpeg;base64,' + imageData;
+      this.base64Image = this.webview.convertFileSrc(imageData);
      }, (err) => {
       console.log(err);
      });
   }
+
 }

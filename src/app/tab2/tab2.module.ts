@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Tab2Page } from './tab2.page';
 import { Camera } from '@ionic-native/camera/ngx';
-import { Options } from 'selenium-webdriver/safari';
+import { WebView } from '@ionic-native/ionic-webview/ngx';
 
 @NgModule({
   imports: [
@@ -15,6 +15,7 @@ import { Options } from 'selenium-webdriver/safari';
     RouterModule.forChild([{ path: '', component: Tab2Page }])
   ],
   providers: [
+    WebView,
     Camera
   ] ,
   declarations: [Tab2Page]
