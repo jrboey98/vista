@@ -7,6 +7,7 @@
 
       Latest Picture:
       <img [src]="domSanitizer.bypassSecurityTrustUrl(base64Image)" *ngIf="base64Image" />
+      <button *ngIf="base64Image" (click)="SavePicture()">Upload Picture</button>
     </ion-card-content>
   </ion-card>
 </ion-content>
