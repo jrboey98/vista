@@ -17,6 +17,7 @@ import { TabsDelegate } from '@ionic/angular';
 })
 export class Tab2Page {
   public base64Image: string;
+  public displayedImage = new Image();
   public imageBlob: Blob;
 
   constructor(private camera: Camera, private domSanitizer: DomSanitizer,
@@ -33,7 +34,9 @@ export class Tab2Page {
     };
 
     this.camera.getPicture(options).then((imageData) => {
-      this.base64Image = this.webview.convertFileSrc(imageData);
+      this.base64Image = imageData;
+      this.displayedImage.src = 'data:image/png;base64,' + this.base64Image;
+      debugger;
     }, (err) => {
       console.log(err);
      });
