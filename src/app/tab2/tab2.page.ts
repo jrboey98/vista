@@ -20,9 +20,14 @@ export class Tab2Page {
   public displayedImage = new Image();
   public imageBlob: Blob;
 
+  public isFinishedUploading: boolean;
+  public uploading: boolean;
+
   constructor(private camera: Camera, private domSanitizer: DomSanitizer,
               protected webview: WebView) {
                 firebase.initializeApp(environment.firebase);
+                this.isFinishedUploading = false;
+                this.uploading = false;
               }
 
   public takePicture() {
@@ -37,42 +42,23 @@ export class Tab2Page {
     this.camera.getPicture(options).then((imageData) => {
       this.base64Image = imageData;
       this.displayedImage.src = 'data:image/png;base64,' + this.base64Image;
-      debugger;
     }, (err) => {
       console.log(err);
      });
   }
 
   public SavePicture() {
+    const self = this;
+    self.uploading = true;
     const storageRef = firebase.storage().ref();
     const filename = Date.now().toString();
     const imageRef = storageRef.child(`images/${filename}.jpg`);
+    self.uploading = true;
     const task = imageRef.putString(this.base64Image, 'base64', { contentType: 'image/jpeg'}).then(function(snapshot) {
       console.log('Uploaded Picture');
+      debugger;
+      self.isFinishedUploading = true;
+      self.uploading = false;
     });
   }
-
-  // private ConvertBaseSixtyFourToBlob(base64Data: string, contentType: string, sliceSize: number): Blob {
-  //   contentType = contentType || '';
-  //       sliceSize = sliceSize || 512;
-
-  //       const byteCharacters = atob(base64Data);
-  //       const byteArrays = [];
-
-  //       for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-  //           const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-  //           const byteNumbers = new Array(slice.length);
-  //           for (let i = 0; i < slice.length; i++) {
-  //               byteNumbers[i] = slice.charCodeAt(i);
-  //           }
-
-  //           const byteArray = new Uint8Array(byteNumbers);
-
-  //           byteArrays.push(byteArray);
-  //       }
-
-  //     const blob = new Blob(byteArrays, {type: contentType});
-  //     return blob;
-  // }
 }

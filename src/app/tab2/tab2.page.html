@@ -1,13 +1,13 @@
 <ion-content class="picture">
   <ion-card>
     <ion-card-content>
-      Hello World, this is my camera app
-
       <button (click)="takePicture()">Take a Picture</button>
 
       Latest Picture:
       <img [src]="displayedImage.src" *ngIf="displayedImage" />
       <button *ngIf="base64Image" (click)="SavePicture()">Upload Picture</button>
+      <p *ngIf="!isFinishedUploading && uploading">Picture is uploading...</p>
+      <p *ngIf="isFinishedUploading">Picture is finished uploading</p>
     </ion-card-content>
   </ion-card>
 </ion-content>
