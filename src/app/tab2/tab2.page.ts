@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
-import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 import { DomSanitizer } from '@angular/platform-browser';
-import { WebView } from '@ionic-native/ionic-webview/ngx';
 import { environment } from '../../environments/environment';
 
+import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { WebView } from '@ionic-native/ionic-webview/ngx';
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+
 import * as firebase from 'firebase';
-import { fileURLToPath } from 'url';
-import { ObjectUnsubscribedError } from 'rxjs';
-import { discardPeriodicTasks } from '@angular/core/testing';
-import { TabsDelegate } from '@ionic/angular';
+import { FirebaseApp } from 'angularfire2';
 
 @Component({
   selector: 'app-tab2',
@@ -19,12 +18,13 @@ export class Tab2Page {
   public base64Image: string;
   public displayedImage = new Image();
   public imageBlob: Blob;
+  public locationMetadata: any;
 
   public isFinishedUploading: boolean;
   public uploading: boolean;
 
   constructor(private camera: Camera, private domSanitizer: DomSanitizer,
-              protected webview: WebView) {
+              protected webview: WebView, private geolocation: Geolocation) {
                 firebase.initializeApp(environment.firebase);
                 this.isFinishedUploading = false;
                 this.uploading = false;
@@ -38,6 +38,17 @@ export class Tab2Page {
       mediaType: this.camera.MediaType.PICTURE,
       correctOrientation: true
     };
+
+    this.geolocation.getCurrentPosition().then((response: any) => {
+      this.locationMetadata = {
+        customMetadata: {
+          'latitude': `${response.coords.latitude}`,
+          'longitude': `${response.coords.longitude}`
+        }
+      };
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
 
     this.camera.getPicture(options).then((imageData) => {
       this.base64Image = imageData;
@@ -54,11 +65,21 @@ export class Tab2Page {
     const filename = Date.now().toString();
     const imageRef = storageRef.child(`images/${filename}.jpg`);
     self.uploading = true;
+
     const task = imageRef.putString(this.base64Image, 'base64', { contentType: 'image/jpeg'}).then(function(snapshot) {
       console.log('Uploaded Picture');
-      debugger;
       self.isFinishedUploading = true;
       self.uploading = false;
+
+      imageRef.updateMetadata(self.locationMetadata).then((metadata) => {
+        console.log(`latitude: ${metadata.customMetadata.latitude}\nlongitude: ${metadata.customMetadata.longitude}`);
+      }).catch((error) => {
+        debugger;
+        console.log('Error creating metadata', error);
+      });
+    }).catch((error) => {
+      debugger;
+      console.log('Error uploading picture', error);
     });
   }
 }
