@@ -7,7 +7,6 @@ import { WebView } from '@ionic-native/ionic-webview/ngx';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import * as firebase from 'firebase';
-import { FirebaseApp } from 'angularfire2';
 import { AngularFirestore } from 'angularfire2/firestore';
 
 @Component({
@@ -36,6 +35,7 @@ export class Tab2Page {
               }
 
   public takePicture() {
+    this.isFinishedUploading = false;
     const options: CameraOptions = {
       quality: 100,
       destinationType: this.camera.DestinationType.DATA_URL,
