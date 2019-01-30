@@ -8,12 +8,14 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 import * as firebase from 'firebase';
 import { FirebaseApp } from 'angularfire2';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss']
 })
+
 export class Tab2Page {
   public base64Image: string;
   public displayedImage = new Image();
@@ -24,8 +26,11 @@ export class Tab2Page {
   public uploading: boolean;
 
   constructor(private camera: Camera, private domSanitizer: DomSanitizer,
-              protected webview: WebView, private geolocation: Geolocation) {
-                firebase.initializeApp(environment.firebase);
+              protected webview: WebView, private geolocation: Geolocation,
+              private db: AngularFirestore) {
+                if (!firebase.apps.length) {
+                  firebase.initializeApp(environment.firebase);
+                }
                 this.isFinishedUploading = false;
                 this.uploading = false;
               }
@@ -76,6 +81,13 @@ export class Tab2Page {
       }).catch((error) => {
         debugger;
         console.log('Error creating metadata', error);
+      });
+
+      const pictureCollectionRef = self.db.collection('PictureReferences');
+      pictureCollectionRef.add({
+        path: `images/${filename}.jpg`,
+        latitude: self.locationMetadata.customMetadata.latitude,
+        longitude: self.locationMetadata.customMetadata.longitude
       });
     }).catch((error) => {
       debugger;

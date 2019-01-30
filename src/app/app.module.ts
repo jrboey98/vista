@@ -10,8 +10,8 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-import { AngularFireModule } from 'angularfire2';
 import { environment } from '../environments/environment';
+import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 
 @NgModule({
@@ -19,6 +19,7 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule.enablePersistence()
   ],
   providers: [
     StatusBar,
