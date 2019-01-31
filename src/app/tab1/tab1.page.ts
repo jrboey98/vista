@@ -28,13 +28,16 @@ export class Tab1Page {
     if (!firebase.apps.length) {
       firebase.initializeApp(environment.firebase);
     }
-    this.pictureCollection = this.db.collection<Pictures>('PictureReferences');
+    this.pictureCollection = this.db.collection<Pictures>('PictureReferences', ref => {
+      return ref.orderBy('date');
+    });
     this.picture$ = this.pictureCollection.valueChanges();
     this.picture$.subscribe(
       result => {
         for (const picture of result) {
-          debugger;
-          this.localImagePaths.push(picture.path);
+          if (!this.localImagePaths.includes(picture.path)) {
+            this.localImagePaths.push(picture.path);
+          }
         }
         this.GetPhotos();
       }
@@ -42,12 +45,13 @@ export class Tab1Page {
   }
 
   public GetPhotos(): void {
-    debugger;
+    this.localImagePaths.reverse();
     const storage = firebase.storage();
-    for (const path of this.localImagePaths) {
-      const pathReference = storage.ref(path);
+    this.localImages.length = this.localImagePaths.length;
+    for (let i = 0; i < this. localImagePaths.length; i++) {
+      const pathReference = storage.ref(this.localImagePaths[i]);
       pathReference.getDownloadURL().then((url) => {
-        this.localImages.push(url);
+        this.localImages[i] = url;
       });
     }
   }
