@@ -29,7 +29,7 @@ export class Tab1Page {
       firebase.initializeApp(environment.firebase);
     }
     this.pictureCollection = this.db.collection<Pictures>('PictureReferences', ref => {
-      return ref.orderBy('date');
+      return ref.orderBy('date', 'desc');
     });
     this.picture$ = this.pictureCollection.valueChanges();
     this.picture$.subscribe(
@@ -45,7 +45,6 @@ export class Tab1Page {
   }
 
   public GetPhotos(): void {
-    this.localImagePaths.reverse();
     const storage = firebase.storage();
     this.localImages.length = this.localImagePaths.length;
     for (let i = 0; i < this. localImagePaths.length; i++) {
