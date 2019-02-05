@@ -20,6 +20,8 @@ export class Tab2Page {
   public displayedImage = new Image();
   public imageBlob: Blob;
   public locationMetadata: any;
+  public latitude: number;
+  public longitude: number;
 
   public isFinishedUploading: boolean;
   public uploading: boolean;
@@ -51,6 +53,8 @@ export class Tab2Page {
           'longitude': `${response.coords.longitude}`
         }
       };
+      this.latitude = response.coords.latitude;
+      this.longitude = response.coords.longitude;
     }).catch((error) => {
       console.log('Error getting location', error);
     });
@@ -86,8 +90,8 @@ export class Tab2Page {
       const pictureCollectionRef = self.db.collection('PictureReferences');
       pictureCollectionRef.add({
         path: `images/${filename}.jpg`,
-        latitude: self.locationMetadata.customMetadata.latitude,
-        longitude: self.locationMetadata.customMetadata.longitude
+        latitude: self.latitude,
+        longitude: self.longitude
       });
     }).catch((error) => {
       debugger;
