@@ -40,10 +40,8 @@ export class Tab1Page {
       firebase.initializeApp(environment.firebase);
     }
     this.geolocation.getCurrentPosition().then((response: any) => {
-      // self.latitude = response.coords.latitude;
-      // self.longitude = response.coords.longitude;
-      self.latitude = 41.2625542;
-      self.longitude = -81.8379279;
+      self.latitude = response.coords.latitude;
+      self.longitude = response.coords.longitude;
     }).finally(() => {
       self.latitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
         return ref.where('latitude', '<', self.latitude + 0.001).where('latitude', '>', self.latitude - 0.001);
