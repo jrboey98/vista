@@ -18,7 +18,6 @@ import { AngularFirestore } from 'angularfire2/firestore';
 export class Tab2Page {
   public base64Image: string;
   public displayedImage = new Image();
-  public imageBlob: Blob;
   public locationMetadata: any;
   public latitude: number;
   public longitude: number;
@@ -46,25 +45,8 @@ export class Tab2Page {
       correctOrientation: true
     };
 
-    this.geolocation.getCurrentPosition().then((response: any) => {
-      this.locationMetadata = {
-        customMetadata: {
-          'latitude': `${response.coords.latitude}`,
-          'longitude': `${response.coords.longitude}`
-        }
-      };
-      this.latitude = response.coords.latitude;
-      this.longitude = response.coords.longitude;
-    }).catch((error) => {
-      console.log('Error getting location', error);
-    });
-
-    this.camera.getPicture(options).then((imageData) => {
-      this.base64Image = imageData;
-      this.displayedImage.src = 'data:image/png;base64,' + this.base64Image;
-    }, (err) => {
-      console.log(err);
-     });
+    this.getLocationData();
+    this.capturePicture(options);
   }
 
   public SavePicture() {
@@ -97,6 +79,39 @@ export class Tab2Page {
     }).catch((error) => {
       debugger;
       console.log('Error uploading picture', error);
+    });
+  }
+
+  private getLocationData() {
+    this.geolocation.getCurrentPosition().then((response: any) => {
+      this.locationMetadata = {
+        customMetadata: {
+          'latitude': `${response.coords.latitude}`,
+          'longitude': `${response.coords.longitude}`
+        }
+      };
+      this.latitude = response.coords.latitude;
+      this.longitude = response.coords.longitude;
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
+  }
+
+  private capturePicture(options: CameraOptions) {
+    this.camera.getPicture(options).then((imageData) => {
+      this.base64Image = imageData;
+      this.displayedImage.src = 'data:image/png;base64,' + this.base64Image;
+    }, (err) => {
+      console.log(err);
+     });
+  }
+
+  private updateMetadata(imageRef){
+    imageRef.updateMetadata(this.locationMetadata).then((metadata) => {
+      console.log(`latitude: ${metadata.customMetadata.latitude}\nlongitude: ${metadata.customMetadata.longitude}`);
+    }).catch((error) => {
+      debugger;
+      console.log('Error creating metadata', error);
     });
   }
 }

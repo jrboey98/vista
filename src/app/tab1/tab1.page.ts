@@ -1,12 +1,13 @@
 import { Component} from '@angular/core';
 
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+
 import { environment } from '../../environments/environment';
 
 import { Observable } from 'rxjs';
 
 import * as firebase from 'firebase';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
-import { Geolocation } from '@ionic-native/geolocation/ngx';
 
 export interface Pictures {
   path: string;
@@ -24,8 +25,6 @@ export interface Pictures {
 export class Tab1Page {
   public localImagePaths: Array<string> = [];
   public localImages: Array<any> = [];
-  public pictureCollection: AngularFirestoreCollection<Pictures>;
-  public picture$: Observable<Pictures[]>;
   public latitude: number;
   public latitudeCollection: AngularFirestoreCollection<Pictures>;
   public latitude$: Observable<Pictures[]>;
@@ -45,54 +44,9 @@ export class Tab1Page {
       self.latitude = response.coords.latitude;
       self.longitude = response.coords.longitude;
     }).finally(() => {
-    const latitudeUpperLimit = self.latitude + 0.01;
-    const latitudeLowerLimit = self.latitude - 0.01;
-    const longitudeUpperLimit = self.longitude + 0.01;
-    const longitudeLowerLimit = self.longitude - 0.01;
-
-      self.latitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
-        return ref.where('latitude', '<', latitudeUpperLimit).where('latitude', '>', latitudeLowerLimit);
-      });
-      self.longitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
-        return ref.where('longitude', '<', longitudeUpperLimit).where('longitude', '>', longitudeLowerLimit);
-      });
-
-      self.latitude$ = self.latitudeCollection.valueChanges();
-      self.longitude$ = self.longitudeCollection.valueChanges();
-
-      self.latitude$.subscribe(
-        result => {
-          result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-          for (const picture of result) {
-            self.latitudePathArray.push(picture.path);
-            self.GetPhotos();
-          }
-        });
-        self.longitude$.subscribe(
-          result => {
-            result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-            for (const picture of result) {
-              self.longitudePathArray.push(picture.path);
-            }
-            self.localImagePaths = self.andArray(self.latitudePathArray, self.longitudePathArray);
-            self.GetPhotos();
-          }
-        );
+      self.queryPhotos(self);
+      self.populateArrays(self);
     });
-    // this.pictureCollection = this.db.collection<Pictures>('PictureReferences', ref => {
-    //   return ref.orderBy('date', 'desc');
-    // });
-    // this.picture$ = this.pictureCollection.valueChanges();
-    // this.picture$.subscribe(
-    //   result => {
-    //     for (const picture of result) {
-    //       if (!this.localImagePaths.includes(picture.path)) {
-    //         this.localImagePaths.push(picture.path);
-    //       }
-    //     }
-    //     this.GetPhotos();
-    //   }
-    // );
   }
 
   public GetPhotos(): void {
@@ -104,6 +58,44 @@ export class Tab1Page {
         this.localImages[i] = url;
       });
     }
+  }
+
+  private queryPhotos(self: this) {
+    const latitudeUpperLimit = self.latitude + 0.01;
+    const latitudeLowerLimit = self.latitude - 0.01;
+    const longitudeUpperLimit = self.longitude + 0.01;
+    const longitudeLowerLimit = self.longitude - 0.01;
+
+    self.latitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
+      return ref.where('latitude', '<', latitudeUpperLimit).where('latitude', '>', latitudeLowerLimit);
+    });
+    self.longitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
+      return ref.where('longitude', '<', longitudeUpperLimit).where('longitude', '>', longitudeLowerLimit);
+    });
+
+    self.latitude$ = self.latitudeCollection.valueChanges();
+    self.longitude$ = self.longitudeCollection.valueChanges();
+  }
+
+  private populateArrays(self: this) {
+    self.latitude$.subscribe(
+      result => {
+        result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+        for (const picture of result) {
+          self.latitudePathArray.push(picture.path);
+          self.GetPhotos();
+        }
+      });
+      self.longitude$.subscribe(
+        result => {
+          result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+          for (const picture of result) {
+            self.longitudePathArray.push(picture.path);
+          }
+          self.localImagePaths = self.andArray(self.latitudePathArray, self.longitudePathArray);
+          self.GetPhotos();
+        }
+      );
   }
 
   private andArray(arrayA: any, arrayB: any): string[] {
