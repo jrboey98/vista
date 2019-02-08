@@ -91,7 +91,8 @@ export class Tab2Page {
       pictureCollectionRef.add({
         path: `images/${filename}.jpg`,
         latitude: self.latitude,
-        longitude: self.longitude
+        longitude: self.longitude,
+        date: Date()
       });
     }).catch((error) => {
       debugger;

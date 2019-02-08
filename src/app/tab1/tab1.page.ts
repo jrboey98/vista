@@ -12,6 +12,7 @@ export interface Pictures {
   path: string;
   latitude: number;
   longitude: number;
+  date: Date;
 }
 
 @Component({
@@ -36,6 +37,7 @@ export class Tab1Page {
 
   constructor(private db: AngularFirestore, private geolocation: Geolocation) {
     const self = this;
+
     if (!firebase.apps.length) {
       firebase.initializeApp(environment.firebase);
     }
@@ -43,11 +45,16 @@ export class Tab1Page {
       self.latitude = response.coords.latitude;
       self.longitude = response.coords.longitude;
     }).finally(() => {
+    const latitudeUpperLimit = self.latitude + 0.01;
+    const latitudeLowerLimit = self.latitude - 0.01;
+    const longitudeUpperLimit = self.longitude + 0.01;
+    const longitudeLowerLimit = self.longitude - 0.01;
+
       self.latitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
-        return ref.where('latitude', '<', self.latitude + 0.001).where('latitude', '>', self.latitude - 0.001);
+        return ref.where('latitude', '<', latitudeUpperLimit).where('latitude', '>', latitudeLowerLimit);
       });
       self.longitudeCollection = self.db.collection<Pictures>('PictureReferences', ref => {
-        return ref.where('longitude', '<', self.longitude + 0.001).where('longitude', '>', self.longitude - 0.001);
+        return ref.where('longitude', '<', longitudeUpperLimit).where('longitude', '>', longitudeLowerLimit);
       });
 
       self.latitude$ = self.latitudeCollection.valueChanges();
@@ -55,6 +62,7 @@ export class Tab1Page {
 
       self.latitude$.subscribe(
         result => {
+          result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
           for (const picture of result) {
             self.latitudePathArray.push(picture.path);
             self.GetPhotos();
@@ -62,6 +70,7 @@ export class Tab1Page {
         });
         self.longitude$.subscribe(
           result => {
+            result.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
             for (const picture of result) {
               self.longitudePathArray.push(picture.path);
             }
